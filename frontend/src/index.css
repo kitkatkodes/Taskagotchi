@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Trebuchet MS", "Comic Sans MS", sans-serif;
+  margin: 0;
+}
