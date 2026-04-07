@@ -24,6 +24,7 @@ class Pet(models.Model):
     energy = models.IntegerField(default=80)
     evolution_stage = models.IntegerField(default=1)
     last_decay_on = models.DateField(default=timezone.now)
+    last_decay_at = models.DateTimeField(default=timezone.now)
 
 
 class Stats(models.Model):

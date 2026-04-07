@@ -23,6 +23,56 @@ def clamp(value):
     return max(0, min(100, value))
 
 
+PRIORITY_MULTIPLIER = {
+    "high": 1.8,
+    "medium": 1.0,
+    "low": 0.55,
+}
+
+
+def apply_time_decay(user):
+    pet = user.pet
+    now = timezone.now()
+    last_decay_at = pet.last_decay_at or now
+    if now <= last_decay_at:
+        return {"health_loss": 0, "energy_loss": 0, "open_tasks": 0}
+
+    open_tasks = Task.objects.filter(user=user, completed=False)
+    health_loss = 0.0
+    energy_loss = 0.0
+    for task in open_tasks:
+        start = max(task.created_at, last_decay_at)
+        hours_ignored = (now - start).total_seconds() / 3600
+        if hours_ignored <= 0:
+            continue
+        multiplier = PRIORITY_MULTIPLIER.get(task.priority, 1.0)
+        health_loss += hours_ignored * 0.45 * multiplier
+        energy_loss += hours_ignored * 0.7 * multiplier
+
+    health_drop = int(health_loss)
+    energy_drop = int(energy_loss)
+    if open_tasks.exists() and health_loss > 0 and health_drop == 0:
+        health_drop = 1
+    if open_tasks.exists() and energy_loss > 0 and energy_drop == 0:
+        energy_drop = 1
+
+    pet.health = clamp(pet.health - health_drop)
+    pet.energy = clamp(pet.energy - energy_drop)
+    if pet.energy < 30:
+        pet.mood = "tired"
+    if pet.health < 35:
+        pet.mood = "sad"
+    if not open_tasks.exists():
+        pet.mood = "happy"
+    pet.last_decay_at = now
+    pet.save()
+    return {
+        "health_loss": health_drop,
+        "energy_loss": energy_drop,
+        "open_tasks": open_tasks.count(),
+    }
+
+
 def ai_message_for(stats, pet):
     if stats.streak >= 5:
         return f"Your {pet.pet_type} is proud of your streak. Keep shining!"
@@ -230,6 +280,7 @@ class TaskListView(APIView):
         if not user or not title:
             return Response({"error": "Invalid payload."}, status=400)
         task = Task.objects.create(user=user, title=title, priority=priority, category=category)
+        push_pet_update(user.id)
         return Response(TaskSerializer(task).data, status=status.HTTP_201_CREATED)
 
 
@@ -265,6 +316,7 @@ class TaskDetailView(APIView):
 
         task.completed = bool(completed)
         task.save()
+        push_pet_update(user.id)
         return Response(TaskSerializer(task).data)
 
     def delete(self, request, task_id):
@@ -275,6 +327,7 @@ class TaskDetailView(APIView):
         if not task:
             return Response({"error": "Task not found."}, status=404)
         task.delete()
+        push_pet_update(user.id)
         return Response(status=204)
 
 
@@ -283,30 +336,14 @@ class PetView(APIView):
         user = get_user(request.query_params.get("user_id"))
         if not user:
             return Response({"error": "Invalid user."}, status=400)
+        decay = apply_time_decay(user)
         pet = user.pet
-        open_count = Task.objects.filter(user=user, completed=False).count()
-        today = timezone.now().date()
-        if pet.last_decay_on != today:
-            # Daily care penalty: the more unfinished tasks, the more pet stats drop.
-            if open_count >= 7:
-                pet.health = clamp(pet.health - 8)
-                pet.energy = clamp(pet.energy - 12)
-                pet.mood = "sad"
-            elif open_count >= 4:
-                pet.health = clamp(pet.health - 4)
-                pet.energy = clamp(pet.energy - 6)
-                pet.mood = "tired"
-            elif open_count >= 1:
-                pet.energy = clamp(pet.energy - 2)
-            else:
-                pet.mood = "happy"
-            pet.last_decay_on = today
-        pet.save()
         return Response({
             "pet": PetSerializer(pet).data,
             "ai_message": ai_message_for(user.stats, pet),
             "ai_suggestions": ai_suggestions(),
             "badges": calculate_badges(user.stats),
+            "decay": decay,
         })
 
     def patch(self, request):

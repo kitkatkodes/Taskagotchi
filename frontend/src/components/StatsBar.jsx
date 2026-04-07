@@ -5,6 +5,7 @@ export default function StatsBar({ stats, mood, onLogout }) {
         <span className="bg-sky px-3 py-1 rounded-full">XP: {stats?.xp ?? 0}</span>
         <span className="bg-mint px-3 py-1 rounded-full">Streak: {stats?.streak ?? 0}</span>
         <span className="bg-peach px-3 py-1 rounded-full capitalize">Mood: {mood || "happy"}</span>
+        <span className="bg-rose-100 text-rose-700 px-3 py-1 rounded-full">Live decay every 15s</span>
         {(stats?.badges || []).map((badge) => (
           <span key={badge} className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
             {badge}

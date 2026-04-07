@@ -57,6 +57,17 @@ export default function Dashboard({ user, onLogout }) {
     return () => socket.close();
   }, [wsUrl]);
 
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const [petData, statsData] = await Promise.all([fetchPet(userId), fetchStats(userId)]);
+      setPet(petData.pet);
+      setStats(statsData);
+      setAiMessage(petData.ai_message);
+      setAiSuggestions(petData.ai_suggestions);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [userId]);
+
   const onAddTask = async (title, priority, category) => {
     const newTask = await addTask(userId, title, priority, category);
     setTasks((prev) => [newTask, ...prev]);
