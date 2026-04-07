@@ -85,3 +85,35 @@ Then open `http://localhost:5173`.
 ## Hackathon Notes
 - Optimized for visual delight and speed of implementation
 - Chat and suggestion logic is lightweight by design for reliable demos
+
+## Deploy (Vercel + Render)
+
+### 1) Deploy backend on Render
+- Quick option: use `render.yaml` blueprint in repo root (recommended)
+- Manual option: create a new **Web Service**, root directory: `backend`
+- Build command: `bash build.sh`
+- Start command: `bash start.sh`
+- Add environment variables:
+  - `DJANGO_DEBUG=false`
+  - `DJANGO_SECRET_KEY=<strong-random-secret>`
+  - `DJANGO_ALLOWED_HOSTS=<your-render-service>.onrender.com`
+  - `CORS_ALLOWED_ORIGINS=https://<your-vercel-app>.vercel.app`
+
+### 2) Deploy frontend on Vercel
+- Import the same repo, set root directory to `frontend`
+- Framework preset: **Vite**
+- Add env variables:
+  - `VITE_API_BASE_URL=https://<your-render-service>.onrender.com`
+  - `VITE_WS_BASE_URL=wss://<your-render-service>.onrender.com`
+- `vercel.json` is included for SPA routing
+
+### 3) Final connect
+- Redeploy backend after adding final Vercel URL to `CORS_ALLOWED_ORIGINS`
+- Open your Vercel URL and test:
+  - login/register
+  - add/complete tasks
+  - pet updates + chat websocket
+
+### Env templates
+- Backend template: `backend/.env.example`
+- Frontend template: `frontend/.env.example`

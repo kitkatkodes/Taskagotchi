@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: taskagotchi-backend
+    env: python
+    rootDir: backend
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: bash start.sh
+    healthCheckPath: /stats/?user_id=1
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_ALLOWED_HOSTS
+        value: taskagotchi-backend.onrender.com

@@ -7,6 +7,7 @@ import {
   fetchStats,
   fetchTasks,
   petAction,
+  petWsUrl,
   sendChat,
   updateTask,
 } from "../api";
@@ -28,7 +29,7 @@ export default function Dashboard({ user, onLogout }) {
   const [decayInfo, setDecayInfo] = useState(null);
 
   const userId = user.user_id;
-  const wsUrl = useMemo(() => `ws://localhost:8000/ws/pet/${userId}/`, [userId]);
+  const wsUrl = useMemo(() => petWsUrl(userId), [userId]);
 
   useEffect(() => {
     const load = async () => {

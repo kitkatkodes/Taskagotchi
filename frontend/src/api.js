@@ -1,4 +1,6 @@
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const WS_BASE =
+  import.meta.env.VITE_WS_BASE_URL || API.replace(/^http/, "ws").replace(/\/$/, "");
 
 async function call(path, options = {}) {
   const response = await fetch(`${API}${path}`, {
@@ -50,3 +52,5 @@ export const sendChat = (userId, message) =>
     method: "POST",
     body: JSON.stringify({ user_id: userId, message }),
   });
+
+export const petWsUrl = (userId) => `${WS_BASE}/ws/pet/${userId}/`;

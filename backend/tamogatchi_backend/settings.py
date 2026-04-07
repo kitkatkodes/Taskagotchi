@@ -1,9 +1,17 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = "hackathon-dev-key"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "hackathon-dev-key")
+DEBUG = os.getenv("DJANGO_DEBUG", "true").lower() == "true"
+
+
+def env_list(key, default=""):
+    raw = os.getenv(key, default)
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,*")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -62,7 +70,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS")
 
 CHANNEL_LAYERS = {
     "default": {
