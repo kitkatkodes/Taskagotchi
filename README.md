@@ -1,4 +1,4 @@
-# Tamogatchi Focus (Hackathon MVP)
+# Taskagotchi (Hackathon MVP)
 
 Tamagotchi-style productivity app where completing tasks keeps your virtual pet happy and evolving.
 

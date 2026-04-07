@@ -29,7 +29,7 @@ export default function App() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-white rounded-3xl shadow-soft p-8"
       >
-        <h1 className="text-3xl text-center font-bold text-pink-500">Tamogatchi Focus</h1>
+        <h1 className="text-3xl text-center font-bold text-pink-500">Taskagotchi</h1>
         <p className="text-center text-gray-600 mt-2">Care for your pet by finishing tasks.</p>
         <div className="mt-6 space-y-3">
           <input

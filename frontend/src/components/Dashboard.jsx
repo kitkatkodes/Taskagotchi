@@ -11,6 +11,7 @@ import {
   updateTask,
 } from "../api";
 import AIMessageBox from "./AIMessageBox";
+import BadgesPanel from "./BadgesPanel";
 import PetChatBox from "./PetChatBox";
 import PetDisplay from "./PetDisplay";
 import PetSelector from "./PetSelector";
@@ -116,7 +117,10 @@ export default function Dashboard({ user, onLogout }) {
             <PetSelector userId={userId} selected={pet?.pet_type} onPetUpdated={setPet} />
             <PetChatBox messages={chatMessages} onSend={onChatSend} />
           </div>
-          <AIMessageBox message={aiMessage} suggestions={aiSuggestions} />
+          <div className="space-y-4">
+            <AIMessageBox message={aiMessage} suggestions={aiSuggestions} />
+            <BadgesPanel badges={stats?.badges || []} />
+          </div>
         </div>
       </div>
     </div>
