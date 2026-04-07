@@ -1,6 +1,6 @@
 # Tamogatchi Focus (Hackathon MVP)
 
-AI-powered Tamagotchi-style productivity app where completing tasks keeps your virtual pet happy and evolving.
+Tamagotchi-style productivity app where completing tasks keeps your virtual pet happy and evolving.
 
 ## Stack
 - Frontend: React + Tailwind CSS + Framer Motion + Vite
@@ -55,7 +55,7 @@ Hackerrank Tamogatchi/
 - Pet state system (`/pet/`) with mood, health, energy, evolution
 - Stats system (`/stats/`) for XP + streak + completed tasks
 - Real-time updates with WebSocket endpoint `ws://localhost:8000/ws/pet/<user_id>/`
-- Mock AI messages + smart suggestions based on user progress
+- Smart motivational messages + suggestions based on user progress
 
 ## Backend Setup
 ```bash
@@ -84,4 +84,4 @@ Then open `http://localhost:5173`.
 
 ## Hackathon Notes
 - Optimized for visual delight and speed of implementation
-- AI is intentionally mocked to keep the MVP lightweight and reliable for demos
+- Chat and suggestion logic is lightweight by design for reliable demos

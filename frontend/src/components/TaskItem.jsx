@@ -7,7 +7,7 @@ export default function TaskItem({ task, onToggle, onDelete }) {
         <input
           type="checkbox"
           checked={task.completed}
-          className="h-4 w-4 accent-pink-500 cursor-pointer"
+          className="h-4 w-4 accent-pink-500"
           onChange={() => onToggle(task)}
         />
         <div className="text-left">

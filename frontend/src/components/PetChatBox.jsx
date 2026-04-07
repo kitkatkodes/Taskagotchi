@@ -16,7 +16,7 @@ export default function PetChatBox({ messages, onSend }) {
   return (
     <div className="bg-white rounded-3xl shadow-soft p-5">
       <h2 className="text-lg font-bold text-pink-500">Pet Chat</h2>
-      <p className="text-xs text-gray-500 mt-1">Character-style companion chat with fallback AI mode.</p>
+      <p className="text-xs text-gray-500 mt-1">Character-style companion chat with smart fallback mode.</p>
       <div className="mt-3 h-56 overflow-auto rounded-xl bg-pink-50 p-3 space-y-2">
         {(messages || []).map((m) => (
           <div
