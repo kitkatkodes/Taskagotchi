@@ -35,19 +35,40 @@ def apply_time_decay(user):
     now = timezone.now()
     last_decay_at = pet.last_decay_at or now
     if now <= last_decay_at:
-        return {"health_loss": 0, "energy_loss": 0, "open_tasks": 0}
+        return {
+            "health_loss": 0,
+            "energy_loss": 0,
+            "open_tasks": 0,
+            "per_priority": {
+                "high": {"count": 0, "health_loss": 0, "energy_loss": 0},
+                "medium": {"count": 0, "health_loss": 0, "energy_loss": 0},
+                "low": {"count": 0, "health_loss": 0, "energy_loss": 0},
+            },
+            "rates_per_hour": {"health": 0.0, "energy": 0.0},
+        }
 
     open_tasks = Task.objects.filter(user=user, completed=False)
     health_loss = 0.0
     energy_loss = 0.0
+    per_priority = {
+        "high": {"count": 0, "health_loss": 0.0, "energy_loss": 0.0},
+        "medium": {"count": 0, "health_loss": 0.0, "energy_loss": 0.0},
+        "low": {"count": 0, "health_loss": 0.0, "energy_loss": 0.0},
+    }
     for task in open_tasks:
         start = max(task.created_at, last_decay_at)
         hours_ignored = (now - start).total_seconds() / 3600
         if hours_ignored <= 0:
             continue
-        multiplier = PRIORITY_MULTIPLIER.get(task.priority, 1.0)
-        health_loss += hours_ignored * 0.45 * multiplier
-        energy_loss += hours_ignored * 0.7 * multiplier
+        priority = task.priority if task.priority in per_priority else "medium"
+        multiplier = PRIORITY_MULTIPLIER.get(priority, 1.0)
+        task_health_loss = hours_ignored * 0.45 * multiplier
+        task_energy_loss = hours_ignored * 0.7 * multiplier
+        health_loss += task_health_loss
+        energy_loss += task_energy_loss
+        per_priority[priority]["count"] += 1
+        per_priority[priority]["health_loss"] += task_health_loss
+        per_priority[priority]["energy_loss"] += task_energy_loss
 
     health_drop = int(health_loss)
     energy_drop = int(energy_loss)
@@ -66,10 +87,24 @@ def apply_time_decay(user):
         pet.mood = "happy"
     pet.last_decay_at = now
     pet.save()
+    rates_per_hour = {
+        "health": round(sum(0.45 * PRIORITY_MULTIPLIER.get(k, 1.0) * v["count"] for k, v in per_priority.items()), 2),
+        "energy": round(sum(0.7 * PRIORITY_MULTIPLIER.get(k, 1.0) * v["count"] for k, v in per_priority.items()), 2),
+    }
+    rounded_per_priority = {
+        key: {
+            "count": value["count"],
+            "health_loss": int(value["health_loss"]),
+            "energy_loss": int(value["energy_loss"]),
+        }
+        for key, value in per_priority.items()
+    }
     return {
         "health_loss": health_drop,
         "energy_loss": energy_drop,
         "open_tasks": open_tasks.count(),
+        "per_priority": rounded_per_priority,
+        "rates_per_hour": rates_per_hour,
     }
 
 

@@ -24,6 +24,7 @@ export default function Dashboard({ user, onLogout }) {
   const [aiMessage, setAiMessage] = useState("Welcome back! Let's make your pet proud.");
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [chatMessages, setChatMessages] = useState([]);
+  const [decayInfo, setDecayInfo] = useState(null);
 
   const userId = user.user_id;
   const wsUrl = useMemo(() => `ws://localhost:8000/ws/pet/${userId}/`, [userId]);
@@ -42,6 +43,7 @@ export default function Dashboard({ user, onLogout }) {
       setAiMessage(petData.ai_message);
       setAiSuggestions(petData.ai_suggestions);
       setChatMessages(chatData);
+      setDecayInfo(petData.decay || null);
     };
     load();
   }, [userId]);
@@ -64,6 +66,7 @@ export default function Dashboard({ user, onLogout }) {
       setStats(statsData);
       setAiMessage(petData.ai_message);
       setAiSuggestions(petData.ai_suggestions);
+      setDecayInfo(petData.decay || null);
     }, 15000);
     return () => clearInterval(interval);
   }, [userId]);
@@ -81,6 +84,7 @@ export default function Dashboard({ user, onLogout }) {
     setPet(petData.pet);
     setStats(statsData);
     setAiMessage(petData.ai_message);
+    setDecayInfo(petData.decay || null);
   };
 
   const onDeleteTask = async (taskId) => {
@@ -104,7 +108,7 @@ export default function Dashboard({ user, onLogout }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-peach to-sky p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <StatsBar stats={stats} mood={pet?.mood} onLogout={onLogout} />
+        <StatsBar stats={stats} mood={pet?.mood} decayInfo={decayInfo} onLogout={onLogout} />
         <div className="grid md:grid-cols-3 gap-4 mt-4">
           <TaskList tasks={tasks} onAddTask={onAddTask} onToggleTask={onToggleTask} onDeleteTask={onDeleteTask} />
           <div className="space-y-4">
