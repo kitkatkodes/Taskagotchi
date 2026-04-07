@@ -67,7 +67,7 @@ export default function Dashboard({ user, onLogout }) {
       setAiMessage(petData.ai_message);
       setAiSuggestions(petData.ai_suggestions);
       setDecayInfo(petData.decay || null);
-    }, 15000);
+    }, 300000);
     return () => clearInterval(interval);
   }, [userId]);
 

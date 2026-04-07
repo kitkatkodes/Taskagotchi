@@ -29,6 +29,12 @@ PRIORITY_MULTIPLIER = {
     "low": 0.55,
 }
 
+PRIORITY_GRACE_HOURS = {
+    "high": 6,
+    "medium": 18,
+    "low": 36,
+}
+
 
 def apply_time_decay(user):
     pet = user.pet
@@ -56,11 +62,13 @@ def apply_time_decay(user):
         "low": {"count": 0, "health_loss": 0.0, "energy_loss": 0.0},
     }
     for task in open_tasks:
-        start = max(task.created_at, last_decay_at)
+        priority = task.priority if task.priority in per_priority else "medium"
+        grace_hours = PRIORITY_GRACE_HOURS.get(priority, 18)
+        decay_start = task.created_at + timezone.timedelta(hours=grace_hours)
+        start = max(last_decay_at, decay_start)
         hours_ignored = (now - start).total_seconds() / 3600
         if hours_ignored <= 0:
             continue
-        priority = task.priority if task.priority in per_priority else "medium"
         multiplier = PRIORITY_MULTIPLIER.get(priority, 1.0)
         task_health_loss = hours_ignored * 0.45 * multiplier
         task_energy_loss = hours_ignored * 0.7 * multiplier
@@ -87,9 +95,20 @@ def apply_time_decay(user):
         pet.mood = "happy"
     pet.last_decay_at = now
     pet.save()
+    overdue_counts = {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+    }
+    for task in open_tasks:
+        priority = task.priority if task.priority in overdue_counts else "medium"
+        grace_hours = PRIORITY_GRACE_HOURS.get(priority, 18)
+        if now >= task.created_at + timezone.timedelta(hours=grace_hours):
+            overdue_counts[priority] += 1
+
     rates_per_hour = {
-        "health": round(sum(0.45 * PRIORITY_MULTIPLIER.get(k, 1.0) * v["count"] for k, v in per_priority.items()), 2),
-        "energy": round(sum(0.7 * PRIORITY_MULTIPLIER.get(k, 1.0) * v["count"] for k, v in per_priority.items()), 2),
+        "health": round(sum(0.45 * PRIORITY_MULTIPLIER.get(k, 1.0) * overdue_counts[k] for k in overdue_counts), 2),
+        "energy": round(sum(0.7 * PRIORITY_MULTIPLIER.get(k, 1.0) * overdue_counts[k] for k in overdue_counts), 2),
     }
     rounded_per_priority = {
         key: {
@@ -104,6 +123,7 @@ def apply_time_decay(user):
         "energy_loss": energy_drop,
         "open_tasks": open_tasks.count(),
         "per_priority": rounded_per_priority,
+        "overdue_counts": overdue_counts,
         "rates_per_hour": rates_per_hour,
     }
 
