@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Django Backend",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["manage.py", "runserver", "8000"],
+      "port": 8000,
+      "cwd": "${workspaceRoot}/backend"
+    },
+    {
+      "name": "Vite Frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173,
+      "cwd": "${workspaceRoot}/frontend"
+    },
+    {
+      "name": "Expo Mobile (Android)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["expo", "start", "--android"],
+      "port": 8081,
+      "cwd": "${workspaceRoot}/mobile"
+    }
+  ]
+}
